@@ -64,3 +64,8 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+model VaultData {
+    id      String    @id @default(cuid())
+    data    String
+}
