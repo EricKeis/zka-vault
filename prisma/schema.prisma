@@ -76,4 +76,5 @@ model Vault {
     data    String
     salt    String
     iv      String
+    authtag String
 }

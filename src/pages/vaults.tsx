@@ -13,9 +13,9 @@ const Vaults: NextPage = () => {
   const vaults = api.vaults.getAll.useQuery();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = async (data: { vaultName: string, vaultPassword: string, vaultData: string }) => {
+  const onSubmit = (data: { vaultName: string, vaultPassword: string, vaultData: string }) => {
     try {
-      const result = await createVault.mutateAsync({ ...data });
+      const result = createVault.mutate({ ...data });
       console.log(data);
     } catch (error) {
       console.error(error);
