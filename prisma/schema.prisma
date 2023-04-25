@@ -74,5 +74,6 @@ model Vault {
     id      String    @id @default(cuid())
     name    String
     data    String
-    keyHash String
+    salt    String
+    iv      String
 }
