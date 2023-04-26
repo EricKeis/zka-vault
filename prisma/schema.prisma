@@ -71,10 +71,11 @@ model VaultData {
 }
 
 model Vault {
-    id      String    @id @default(cuid())
-    name    String
-    data    String
-    salt    String
-    iv      String
-    authtag String
+    id              String    @id @default(cuid())
+    name            String
+    data            String
+    salt            String
+    iv              String
+    authtag         String
+    passwordHash    String
 }

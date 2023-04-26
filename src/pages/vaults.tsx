@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Table } from "flowbite-react";
-
+import { hashPassword } from "~/utils/cryptoUtils";
 
 const Vaults: NextPage = () => {
   const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
@@ -20,6 +20,7 @@ const Vaults: NextPage = () => {
     try {
       const result = createVault.mutate({ ...data });
       console.log(data);
+      sessionStatus === "authenticated" ? console.log(hashPassword(data.vaultPassword, sessionData?.user.id)) : null;
 
       resetForm();
     } catch (error) {
@@ -70,7 +71,7 @@ const Vaults: NextPage = () => {
         </div>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-10">
         <form onSubmit={handleSubmit(onSubmit)} className="px-3 w-full md:w-1/2">
           <div className="mb-3">
             <label 
