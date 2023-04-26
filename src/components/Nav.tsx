@@ -1,7 +1,17 @@
-import { Avatar, Dropdown, Navbar } from "flowbite-react";
+import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
+import { signIn, useSession } from "next-auth/react";
+import UserDropdown from "./navigation/UserDropdown";
+import { Session } from "next-auth";
 
-const Nav: React.FC  = () => {
-  const { data: sessionData } = useSession();
+interface NavigationProps {
+  activeTab: string | null
+  sessionData: Session | null
+  sessionStatus: "authenticated" | "loading" | "unauthenticated"
+}
+
+const Nav: React.FC<NavigationProps> = ({ activeTab = null, sessionData = null, sessionStatus = "unauthenticated" }) => {
+
+  console.log(sessionData?.user);
 
   return (
     <>
@@ -19,44 +29,35 @@ const Nav: React.FC  = () => {
           ZKA Vault
           </span>
         </Navbar.Brand>
-        <div className="flex md:order-2">
-          <Dropdown
-            arrowIcon={false}
-            inline={true}
-            label={<Avatar alt="User settings" img="https://flowbite.com/docs/images/people/profile-picture-5.jpg" rounded={true}/>}
-          >
-            <Dropdown.Header>
-              <span className="block text-sm">
-                Bonnie Green
-              </span>
-              <span className="block truncate text-sm font-medium">
-                name@flowbite.com
-              </span>
-            </Dropdown.Header>
-            <Dropdown.Item>
-              Dashboard
-            </Dropdown.Item>
-            <Dropdown.Item>
-              Settings
-            </Dropdown.Item>
-            <Dropdown.Item>
-              Earnings
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item>
-              Sign out
-            </Dropdown.Item>
-          </Dropdown>
-          <Navbar.Toggle />
-        </div>
+        
+        {sessionStatus === "unauthenticated"
+          ? <div className="flex md:order-2">
+              <Button
+                onClick={() => void signIn()}
+              >
+                Log In
+              </Button>
+              <Navbar.Toggle />
+            </div>
+          : sessionStatus === "loading"
+          ? <div className="flex md:order-2">
+              <Avatar rounded={true}/>
+            </div>
+          : <UserDropdown sessionData={sessionData}/>
+        }
+        
+
         <Navbar.Collapse>
           <Navbar.Link
             href="/"
-            active={true}
+            active={activeTab === "Home"}
           >
             Home
           </Navbar.Link>
-          <Navbar.Link href="/vaults">
+          <Navbar.Link 
+            href="/vaults"
+            active={activeTab === "Vault"}
+          >
             Vault
           </Navbar.Link>
         </Navbar.Collapse>

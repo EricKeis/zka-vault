@@ -6,12 +6,14 @@ import Nav from "~/components/Nav";
 import { useForm } from 'react-hook-form';
 
 import { api } from "~/utils/api";
+import { useSession } from "next-auth/react";
 
 
 const Vaults: NextPage = () => {
   const createVault = api.vaults.createVault.useMutation();
   const vaults = api.vaults.getAll.useQuery();
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const { data: sessionData, status: sessionStatus } = useSession();
 
   const onSubmit = (data: { vaultName: string, vaultPassword: string, vaultData: string }) => {
     try {
@@ -24,7 +26,11 @@ const Vaults: NextPage = () => {
 
   return (
     <>
-      <Nav />
+      <Nav 
+        activeTab={"Vault"}
+        sessionData={sessionData}
+        sessionStatus={sessionStatus}
+      />
       
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-6">
