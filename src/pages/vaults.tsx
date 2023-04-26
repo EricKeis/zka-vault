@@ -11,15 +11,17 @@ import { Table } from "flowbite-react";
 
 
 const Vaults: NextPage = () => {
-  const createVault = api.vaults.createVault.useMutation();
+  const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
   const vaults = api.vaults.getAll.useQuery();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm();
   const { data: sessionData, status: sessionStatus } = useSession();
 
   const onSubmit = (data: { vaultName: string, vaultPassword: string, vaultData: string }) => {
     try {
       const result = createVault.mutate({ ...data });
       console.log(data);
+
+      resetForm();
     } catch (error) {
       console.error(error);
     }
@@ -35,37 +37,37 @@ const Vaults: NextPage = () => {
       
       <h1 className="text-center my-5 font-semibold">Saved Vaults</h1>
       <div className="flex justify-center">
-      <div className="mb-9 px-3 w-full md:w-1/2">
-        <Table striped={true}>
-          <Table.Head>
-            <Table.HeadCell>
-              Vault Name
-            </Table.HeadCell>
-            <Table.HeadCell>
-              <span className="sr-only">
-                Edit
-              </span>
-            </Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {vaults.data?.map(v => (
-              <Table.Row key={v.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  {v.name}
-                </Table.Cell>
-                <Table.Cell>
-                  <Link 
-                    href={`/vault/${v.id}`}
-                    className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-                  >
-                    View
-                  </Link>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-      </div>
+        <div className="mb-9 px-3 w-full md:w-1/2">
+          <Table striped={true}>
+            <Table.Head>
+              <Table.HeadCell>
+                Vault Name
+              </Table.HeadCell>
+              <Table.HeadCell>
+                <span className="sr-only">
+                  Edit
+                </span>
+              </Table.HeadCell>
+            </Table.Head>
+            <Table.Body className="divide-y">
+              {vaults.data?.map(v => (
+                <Table.Row key={v.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                  <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    {v.name}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Link 
+                      href={`/vault/${v.id}`}
+                      className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                    >
+                      View
+                    </Link>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </div>
       </div>
 
       <div className="flex justify-center">
