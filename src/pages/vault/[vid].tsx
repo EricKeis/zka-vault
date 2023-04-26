@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import Navbar from "~/components/Navbar";
+import Nav from "~/components/Nav";
 import { api } from "~/utils/api";
 import { useForm } from 'react-hook-form';
 
@@ -10,7 +10,10 @@ const Vault: NextPage = () => {
   const { vid } = router.query;
   
 
-  const vault = api.vaults.getVaultById.useQuery({ id: vid as string });
+  const vault = api.vaults.getVaultById.useQuery(
+    { id: vid as string },
+    { enabled: vid !== undefined },
+  );
   const vaultData = api.vaults.getVaultData.useMutation();
   
   
@@ -25,12 +28,12 @@ const Vault: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Nav />
       <p>{vault.data?.name}</p>
 
       {vaultData.isSuccess 
         ?
-          <p>{vaultData.data.data}</p>
+          <p className="whitespace-pre-wrap">{vaultData.data.data}</p>
         :
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-6">

@@ -2,7 +2,7 @@ import { VaultData } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
-import Navbar from "~/components/Navbar";
+import Nav from "~/components/Nav";
 import { useForm } from 'react-hook-form';
 
 import { api } from "~/utils/api";
@@ -24,7 +24,7 @@ const Vaults: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Nav />
       
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-6">
