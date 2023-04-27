@@ -65,17 +65,19 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model VaultData {
-    id      String    @id @default(cuid())
-    data    String
-}
-
 model Vault {
     id              String    @id @default(cuid())
     name            String
     data            String
-    salt            String
-    iv              String
-    authtag         String
+    encryptionData  EncryptionData?
+}
+
+model EncryptionData {
     passwordHash    String
+    passwordSalt    String
+    aes256Iv        String
+    aes256KeySalt   String
+    aes256Authtag   String
+    vaultId         String  @unique
+    vault           Vault   @relation(fields: [vaultId], references: [id], onDelete: Cascade)
 }
