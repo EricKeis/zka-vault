@@ -17,28 +17,21 @@ function generateKeyFromPassphrase(passphrase: string, salt: Buffer) {
 
 export const vaultRouter = createTRPCRouter({
   createVault: publicProcedure
-  .input(z.object({ vaultName: z.string(), vaultPassword: z.string(), vaultData: z.string() }))
+  .input(z.object({ vaultName: z.string(), vaultData: z.string(), vaultPasswordHash: z.string() }))
     .mutation(async ({ctx, input}) => {
-      const iv = crypto.randomBytes(12)
-      const algorithm = 'aes-256-gcm';
-
       const salt = crypto.randomBytes(16);
-      const key = generateKeyFromPassphrase(input.vaultPassword, salt);
-      console.log(key.toString('base64'));
-
-      const cipher = crypto.createCipheriv(algorithm, key, iv);
-
-      let enc = cipher.update(input.vaultData, 'utf8', 'base64');
-      enc += cipher.final('base64');
-
-      const encryptedData = { iv: iv.toString('base64'), ciphertext: enc, tag: cipher.getAuthTag().toString('base64') };
-      console.log(encryptedData);
-      console.log({ salt: salt.toString('base64'), key: key, passphrase: input.vaultPassword })
-
       const newVault = await ctx.prisma.vault.create({
-        data: {name: input.vaultName, data: enc, salt: salt.toString('base64'), iv: encryptedData.iv, authtag: encryptedData.tag},
+        data: {
+          name: input.vaultName, 
+          data: input.vaultData,
+          encryptionData: {
+            
+          },
+        },
       })
       console.log(input);
+
+      //, salt: salt.toString('base64'), iv: encryptedData.iv, authtag: encryptedData.tag
       
       return newVault;
     }),

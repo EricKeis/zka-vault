@@ -63,7 +63,7 @@ const Nav: React.FC<NavigationProps> = ({ activeTab = null, sessionData = null, 
               active={activeTab === "Vault"}
               as={Link}
             >
-              Public Vaults
+              Vaults
             </Navbar.Link>
           </Navbar.Collapse>
         </div>

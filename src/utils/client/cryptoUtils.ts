@@ -1,7 +1,7 @@
 async function getKeyMaterialFromPassword(password: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
 
-  return window.crypto.subtle.importKey(
+  return await window.crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
     {name: "PBKDF2"},
@@ -13,7 +13,7 @@ async function getKeyMaterialFromPassword(password: string): Promise<CryptoKey> 
 async function deriveKeyFromPassword(keyMaterial: CryptoKey, salt: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   
-  return window.crypto.subtle.deriveKey(
+  return await window.crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
       salt: encoder.encode(salt),
@@ -53,7 +53,7 @@ export async function decryptData(iv: string, password: string, salt: string, da
   const decryptedData = await window.crypto.subtle.decrypt(
     {
       name: "AES_GCM",
-      iv: encoder.encode(iv);
+      iv: encoder.encode(iv)
     },
     key,
     encryptedArray
@@ -64,7 +64,7 @@ export async function decryptData(iv: string, password: string, salt: string, da
 
 export async function getPasswordHash(password: string, uid: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(password + uid);
-  const hashBuffer = await crypto.subtle.digest("SHA-512", msgUint8);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-512", msgUint8);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
