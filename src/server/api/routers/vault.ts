@@ -1,12 +1,13 @@
 import { z } from "zod";
 import crypto from 'crypto';
-
 import {
   createTRPCRouter,
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
 import { Vault } from "@prisma/client";
+import { getServerSidePasswordHash } from "~/utils/server/cryptoUtils";
+import { TRPCError } from "@trpc/server";
 
 function generateKeyFromPassphrase(passphrase: string, salt: Buffer) {
   const iterations = 10000;
@@ -16,17 +17,19 @@ function generateKeyFromPassphrase(passphrase: string, salt: Buffer) {
 }
 
 export const vaultRouter = createTRPCRouter({
-  createVault: publicProcedure
-  .input(z.object({ vaultName: z.string(), vaultData: z.string(), vaultPasswordHash: z.string() }))
+  createVault: protectedProcedure
+  .input(z.object({ name: z.string(), data: z.string(), passwordClientSideHash: z.string(), keySalt: z.string(), iv: z.string() }))
     .mutation(async ({ctx, input}) => {
-      const salt = crypto.randomBytes(16);
+      const passwordSalt = crypto.randomBytes(16).toString('base64');
+      const passwordServerSideHash = getServerSidePasswordHash(input.passwordClientSideHash, passwordSalt);
       const newVault = await ctx.prisma.vault.create({
         data: {
-          name: input.vaultName, 
-          data: input.vaultData,
-          encryptionData: {
-            
-          },
+          name: input.name, 
+          data: input.data,
+          passwordHash: passwordServerSideHash,
+          passwordSalt: passwordSalt,
+          aes256Iv: input.iv,
+          aes256KeySalt: input.keySalt
         },
       })
       console.log(input);
@@ -36,14 +39,14 @@ export const vaultRouter = createTRPCRouter({
       return newVault;
     }),
   
-  getAll: publicProcedure
+  getAll: protectedProcedure
     .query(async ({ctx}) => {
       const vaults = await ctx.prisma.vault.findMany();
 
       return vaults;
     }),
 
-  getVaultById: publicProcedure
+  getVaultById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ctx, input}) => {
       const vault = await ctx.prisma.vault.findUnique({
@@ -55,30 +58,22 @@ export const vaultRouter = createTRPCRouter({
       return {name: vault?.name};
     }),
 
-  getVaultData: publicProcedure
-    .input(z.object({ id: z.string(), password: z.string()}))
+  getVaultData: protectedProcedure
+    .input(z.object({ id: z.string(), passwordClientSideHash: z.string()}))
     .mutation(async ({ctx, input}) => {
       const vault: Vault = await ctx.prisma.vault.findUniqueOrThrow({
         where: {
           id: input.id,
         },
       })
+      const passwordServerSideHash = getServerSidePasswordHash(input.passwordClientSideHash, vault.passwordSalt);
 
-      const iv = Buffer.from(vault.iv, 'base64');
-      const algorithm = 'aes-256-gcm';
+      console.log({ old: vault.passwordHash, new: passwordServerSideHash });
 
-      const salt = Buffer.from(vault.salt, 'base64');
-      const key = generateKeyFromPassphrase(input.password, salt);
-
-      console.log({ iv: iv.toString('base64'), salt: salt.toString('base64'), key: key.toString('base64'), passphrase: input.password })
-
-      const decipher = crypto.createDecipheriv(algorithm, key, iv);
-      decipher.setAuthTag(Buffer.from(vault.authtag, 'base64'));
-      let str = decipher.update(vault.data, 'base64', 'utf8');
-      str += decipher.final('utf8');
-
-      console.log(str)
-      return {data: str};
+      if (passwordServerSideHash !== vault.passwordHash) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' })
+      }
+      return vault;
 
     })
 });

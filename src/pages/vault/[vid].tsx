@@ -3,24 +3,33 @@ import { useRouter } from "next/router";
 import Nav from "~/components/Nav";
 import { api } from "~/utils/api";
 import { useForm } from 'react-hook-form';
+import { decryptData, getPasswordHash } from "~/utils/client/cryptoUtils";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 const Vault: NextPage = () => {
   const router =  useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, getValues , formState: { errors } } = useForm();
+  const { data: sessionData, status: sessionStatus } = useSession();
   const { vid } = router.query;
+  const [decryptedData, setDecryptedData] = useState("");
   
 
   const vault = api.vaults.getVaultById.useQuery(
     { id: vid as string },
     { enabled: vid !== undefined },
   );
-  const vaultData = api.vaults.getVaultData.useMutation();
+  const vaultData = api.vaults.getVaultData.useMutation({
+    onSuccess: async (data, variables, context) => {
+      setDecryptedData(await decryptData(data.aes256Iv, getValues("password") as string, data.aes256KeySalt, data.data));
+    }
+  });
   
   
-  const onSubmit = (data: { password: string }) => {
+  const onSubmit = async (data: { password: string }) => {
     try {
-      const result = vaultData.mutate({ id: vid as string, ...data });
-      console.log(result);
+      const passwordHash = await getPasswordHash(data.password, sessionData?.user.id as string)
+      const v = vaultData.mutate({ id: vid as string, passwordClientSideHash: passwordHash });
     } catch (error) {
       console.error(error);
     }
@@ -28,12 +37,16 @@ const Vault: NextPage = () => {
 
   return (
     <>
-      <Nav />
+      <Nav 
+        activeTab={null}
+        sessionData={sessionData}
+        sessionStatus={sessionStatus}
+      />
       <p>{vault.data?.name}</p>
 
       {vaultData.isSuccess 
         ?
-          <p className="whitespace-pre-wrap">{vaultData.data.data}</p>
+          <p className="whitespace-pre-wrap">{decryptedData}</p>
         :
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-6">

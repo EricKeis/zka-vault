@@ -27,10 +27,10 @@ async function deriveKeyFromPassword(keyMaterial: CryptoKey, salt: string): Prom
   );
 }
 
-export async function encryptData(iv: string, password: string, salt: string, data: string): Promise<string> {
+export async function encryptData(iv: string, password: string, keySalt: string, data: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyMaterial = await getKeyMaterialFromPassword(password);
-  const key = await deriveKeyFromPassword(keyMaterial, salt);
+  const key = await deriveKeyFromPassword(keyMaterial, keySalt);
   const encryptedData = await window.crypto.subtle.encrypt(
     {
       name: "AES-GCM",
@@ -52,7 +52,7 @@ export async function decryptData(iv: string, password: string, salt: string, da
   const encryptedArray = new Uint8Array(encryptedData);
   const decryptedData = await window.crypto.subtle.decrypt(
     {
-      name: "AES_GCM",
+      name: "AES-GCM",
       iv: encoder.encode(iv)
     },
     key,

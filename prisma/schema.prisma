@@ -69,15 +69,8 @@ model Vault {
     id              String    @id @default(cuid())
     name            String
     data            String
-    encryptionData  EncryptionData?
-}
-
-model EncryptionData {
     passwordHash    String
     passwordSalt    String
     aes256Iv        String
     aes256KeySalt   String
-    aes256Authtag   String
-    vaultId         String  @unique
-    vault           Vault   @relation(fields: [vaultId], references: [id], onDelete: Cascade)
 }

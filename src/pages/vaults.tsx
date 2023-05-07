@@ -1,10 +1,8 @@
-import { VaultData } from "@prisma/client";
-import { GetServerSideProps, NextPage } from "next";
+import { NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import Nav from "~/components/Nav";
 import { useForm } from 'react-hook-form';
-
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Table } from "flowbite-react";
@@ -25,15 +23,13 @@ const Vaults: NextPage = () => {
       const vaultData = {
         name: rawData.vaultName, 
         data: encryptedData, 
-        encryptionData: {
-          passwordHash: passwordHash,
-          passwordSalt: salt,
-          iv: iv,
-        },
+        passwordClientSideHash: passwordHash,
+        keySalt: salt,
+        iv: iv
       };
       const result = createVault.mutate({ ...vaultData });
       console.log(vaultData);
-      console.log();
+      console.log(rawData);
 
       resetForm();
     } catch (error) {

@@ -14,8 +14,6 @@ interface NavigationProps {
 
 const Nav: React.FC<NavigationProps> = ({ activeTab = null, sessionData = null, sessionStatus = "unauthenticated" }) => {
 
-  console.log(sessionData?.user);
-
   return (
     <>
       <Navbar
