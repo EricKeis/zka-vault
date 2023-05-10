@@ -17,6 +17,7 @@ const Nav: React.FC<NavigationProps> = ({ activeTab = null, sessionData = null, 
   return (
     <>
       <Navbar
+      className="min-w-full"
       fluid={true}
       rounded={true}
       >
