@@ -55,6 +55,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    vaults        Vault[]
 }
 
 model VerificationToken {
@@ -73,4 +74,6 @@ model Vault {
     passwordSalt    String
     aes256Iv        String
     aes256KeySalt   String
+    userId          String
+    user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

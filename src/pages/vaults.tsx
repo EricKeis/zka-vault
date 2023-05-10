@@ -9,10 +9,10 @@ import { Table } from "flowbite-react";
 import { encryptData, getPasswordHash } from "~/utils/client/cryptoUtils";
 
 const Vaults: NextPage = () => {
-  const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
-  const vaults = api.vaults.getAll.useQuery();
   const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm();
   const { data: sessionData, status: sessionStatus } = useSession();
+  const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
+  const vaults = api.vaults.getAllVaultsByUser.useQuery({ uid: sessionData?.user.id as string });
 
   const onSubmit = async (rawData: { vaultName: string, vaultPassword: string, vaultData: string }) => {
     try {
@@ -25,7 +25,8 @@ const Vaults: NextPage = () => {
         data: encryptedData, 
         passwordClientSideHash: passwordHash,
         keySalt: salt,
-        iv: iv
+        iv: iv,
+        userId: sessionData?.user.id as string
       };
       const result = createVault.mutate({ ...vaultData });
       console.log(vaultData);
@@ -40,7 +41,7 @@ const Vaults: NextPage = () => {
   return (
     <>
       <Nav 
-        activeTab={"Vault"}
+         activeTab={"Vault"}
         sessionData={sessionData}
         sessionStatus={sessionStatus}
       />

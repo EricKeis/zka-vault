@@ -18,19 +18,24 @@ function generateKeyFromPassphrase(passphrase: string, salt: Buffer) {
 
 export const vaultRouter = createTRPCRouter({
   createVault: protectedProcedure
-  .input(z.object({ name: z.string(), data: z.string(), passwordClientSideHash: z.string(), keySalt: z.string(), iv: z.string() }))
+  .input(z.object({ name: z.string(), data: z.string(), passwordClientSideHash: z.string(), keySalt: z.string(), iv: z.string(), userId: z.string() }))
     .mutation(async ({ctx, input}) => {
       const passwordSalt = crypto.randomBytes(16).toString('base64');
       const passwordServerSideHash = getServerSidePasswordHash(input.passwordClientSideHash, passwordSalt);
-      const newVault = await ctx.prisma.vault.create({
+      const newVault = await ctx.prisma.user.update({
+        where: { id: input.userId },
         data: {
-          name: input.name, 
-          data: input.data,
-          passwordHash: passwordServerSideHash,
-          passwordSalt: passwordSalt,
-          aes256Iv: input.iv,
-          aes256KeySalt: input.keySalt
-        },
+          vaults: {
+            create: {
+              name: input.name, 
+              data: input.data,
+              passwordHash: passwordServerSideHash,
+              passwordSalt: passwordSalt,
+              aes256Iv: input.iv,
+              aes256KeySalt: input.keySalt
+            }
+          }
+        }
       })
       console.log(input);
 
@@ -39,9 +44,14 @@ export const vaultRouter = createTRPCRouter({
       return newVault;
     }),
   
-  getAll: protectedProcedure
-    .query(async ({ctx}) => {
-      const vaults = await ctx.prisma.vault.findMany();
+  getAllVaultsByUser: protectedProcedure
+    .input(z.object({ uid: z.string() }))
+    .query(async ({ctx, input}) => {
+      const vaults = await ctx.prisma.vault.findMany({
+        where: {
+          userId: input.uid
+        }
+      });
 
       return vaults;
     }),

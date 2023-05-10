@@ -24,7 +24,7 @@ const UserDropdown: React.FC<NavigationProps> = ({ sessionData }) => {
           </span>
         </Dropdown.Header>
         <Dropdown.Item>
-          Profile
+          Vaults
         </Dropdown.Item>
         <Dropdown.Item>
           Account
