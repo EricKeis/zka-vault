@@ -2,19 +2,25 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import Nav from "~/components/Nav";
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Table } from "flowbite-react";
 import { encryptData, getPasswordHash } from "~/utils/client/cryptoUtils";
 
+type FormValues = {
+  vaultName: string;
+  vaultPassword: string;
+  vaultData: string;
+}
+
 const Vaults: NextPage = () => {
-  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm<FormValues>();
   const { data: sessionData, status: sessionStatus } = useSession();
   const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
   const vaults = api.vaults.getAllVaultsByUser.useQuery({ uid: sessionData?.user.id as string });
 
-  const onSubmit = async (rawData: { vaultName: string, vaultPassword: string, vaultData: string }) => {
+  const onSubmit: SubmitHandler<FormValues> = async (rawData: { vaultName: string, vaultPassword: string, vaultData: string }) => {
     try {
       const passwordHash = await getPasswordHash(rawData.vaultPassword, sessionData?.user.id as string);
       const iv = window.btoa(String.fromCharCode(...window.crypto.getRandomValues(new Uint8Array(12))));
