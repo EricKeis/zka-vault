@@ -1,7 +1,7 @@
-import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
-import { signIn, useSession } from "next-auth/react";
+import { Avatar, Button, Navbar } from "flowbite-react";
+import { signIn } from "next-auth/react";
 import UserDropdown from "./navigation/UserDropdown";
-import { Session } from "next-auth";
+import type { Session } from "next-auth";
 import Image from "next/image";
 import logo from ".//../../public/vault.png";
 import Link from "next/link";

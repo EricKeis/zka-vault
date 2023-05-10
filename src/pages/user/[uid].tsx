@@ -1,5 +1,4 @@
-import { NextPage } from "next";
-import Nav from "~/components/Nav";
+import type { NextPage } from "next";
 
 
 const User: NextPage = () => {
@@ -12,3 +11,5 @@ const User: NextPage = () => {
     </>
   )
 }
+
+export default User;

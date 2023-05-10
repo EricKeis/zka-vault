@@ -1,14 +1,12 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
-import { api } from "~/utils/api";
 import Nav from "~/components/Nav";
 import { Button } from "flowbite-react";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const { data: sessionData, status: sessionStatus } = useSession();
 
   return (
@@ -32,7 +30,7 @@ const Home: NextPage = () => {
             Zero Knowledge Architecture <span className="text-[hsl(215,100%,40%)]">Vault</span>
           </h1>
         
-        <p className="text-center text-sky-800 w-3/4 mt-10">Our Zero Knowledge Architecture Vault incorporates AES256-GCM encryption to ensure the utmost security of your sensitive information. By employing a strict "no knowledge" approach, only you hold the key to access your encrypted data, guaranteeing complete privacy. This cutting-edge vault provides industry-leading protection, safeguarding your data from unauthorized access and maintaining the confidentiality of your information.</p>
+        <p className="text-center text-sky-800 w-3/4 mt-10">Our Zero Knowledge Architecture Vault incorporates AES256-GCM encryption to ensure the utmost security of your sensitive information. By employing a strict &ldquo;no knowledge&rdquo; approach, only you hold the key to access your encrypted data, guaranteeing complete privacy. This cutting-edge vault provides industry-leading protection, safeguarding your data from unauthorized access and maintaining the confidentiality of your information.</p>
         
 
         {/* div for the github buttons*/}
@@ -73,27 +71,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined },
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Log out" : "Log in"}
-      </button>
-    </div>
-  );
-};
