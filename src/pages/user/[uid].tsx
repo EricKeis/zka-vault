@@ -7,7 +7,6 @@ const User: NextPage = () => {
 
   return (
     <>
-      <Nav />
 
       
     </>
