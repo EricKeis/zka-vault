@@ -2,19 +2,11 @@ import { z } from "zod";
 import crypto from 'crypto';
 import {
   createTRPCRouter,
-  publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-import { Vault } from "@prisma/client";
+import type { Vault } from "@prisma/client";
 import { getServerSidePasswordHash } from "~/utils/server/cryptoUtils";
 import { TRPCError } from "@trpc/server";
-
-function generateKeyFromPassphrase(passphrase: string, salt: Buffer) {
-  const iterations = 10000;
-  const keyLength = 32; // 256-bit key
-
-  return crypto.pbkdf2Sync(passphrase, salt, iterations, keyLength, 'sha256');
-}
 
 export const vaultRouter = createTRPCRouter({
   createVault: protectedProcedure

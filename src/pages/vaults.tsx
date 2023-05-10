@@ -1,8 +1,8 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import Link from "next/link";
-import { z } from "zod";
 import Nav from "~/components/Nav";
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Table } from "flowbite-react";
@@ -15,7 +15,7 @@ type FormValues = {
 }
 
 const Vaults: NextPage = () => {
-  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, reset: resetForm } = useForm<FormValues>();
   const { data: sessionData, status: sessionStatus } = useSession();
   const createVault = api.vaults.createVault.useMutation({onSuccess: () => vaults.refetch()});
   const vaults = api.vaults.getAllVaultsByUser.useQuery({ uid: sessionData?.user.id as string });
@@ -34,7 +34,7 @@ const Vaults: NextPage = () => {
         iv: iv,
         userId: sessionData?.user.id as string
       };
-      const result = createVault.mutate({ ...vaultData });
+      createVault.mutate({ ...vaultData });
       console.log(vaultData);
       console.log(rawData);
 

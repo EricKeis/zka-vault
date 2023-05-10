@@ -1,12 +1,13 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Nav from "~/components/Nav";
 import { api } from "~/utils/api";
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { decryptData, getPasswordHash } from "~/utils/client/cryptoUtils";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Button, Card, TextInput } from "flowbite-react";
+import { Card } from "flowbite-react";
 
 type FormValues = {
   password: string;
@@ -14,7 +15,7 @@ type FormValues = {
 
 const Vault: NextPage = () => {
   const router =  useRouter();
-  const { register, handleSubmit, getValues , formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, getValues } = useForm<FormValues>();
   const { data: sessionData, status: sessionStatus } = useSession();
   const { vid } = router.query;
   const [decryptedData, setDecryptedData] = useState("");
@@ -25,7 +26,7 @@ const Vault: NextPage = () => {
     { enabled: vid !== undefined },
   );
   const vaultData = api.vaults.getVaultData.useMutation({
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (data) => {
       setDecryptedData(await decryptData(data.aes256Iv, getValues("password"), data.aes256KeySalt, data.data));
     }
   });
@@ -34,7 +35,7 @@ const Vault: NextPage = () => {
   const onSubmit: SubmitHandler<FormValues> = async (data: { password: string }) => {
     try {
       const passwordHash = await getPasswordHash(data.password, sessionData?.user.id as string)
-      const v = vaultData.mutate({ id: vid as string, passwordClientSideHash: passwordHash });
+      vaultData.mutate({ id: vid as string, passwordClientSideHash: passwordHash });
     } catch (error) {
       console.error(error);
     }
