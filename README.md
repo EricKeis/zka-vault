@@ -4,4 +4,6 @@ Utilizes crypto libraries to store encrypted data without ever sharing the decry
 
 Great example of a simple yet effective secure storage solution that mitigates MITM and other network attacks as well as attacks that target the storage server. 
 
+See it in action: https://zka-vault-erickeis.vercel.app/
+
 Created for CS4920 and CS4930 semester projects
